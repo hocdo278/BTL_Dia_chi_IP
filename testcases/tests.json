@@ -1,0 +1,477 @@
+[
+ {
+  "group": "sample",
+  "name": "sample_de_bai",
+  "input": "25525511135",
+  "expected": [
+   "255.255.11.135",
+   "255.255.111.35"
+  ],
+  "note": "Vi du trong de wecode"
+ },
+ {
+  "group": "normal",
+  "name": "normal_01",
+  "input": "192168001001",
+  "expected": [],
+  "note": "12 chu so nhung doan 001 co so 0 dau, vo nghiem"
+ },
+ {
+  "group": "normal",
+  "name": "normal_02",
+  "input": "1921681",
+  "expected": [
+   "1.9.216.81",
+   "1.92.16.81",
+   "1.92.168.1",
+   "19.2.16.81",
+   "19.2.168.1",
+   "19.21.6.81",
+   "19.21.68.1",
+   "19.216.8.1",
+   "192.1.6.81",
+   "192.1.68.1",
+   "192.16.8.1"
+  ],
+  "note": "7 chu so, nhieu dap an"
+ },
+ {
+  "group": "normal",
+  "name": "normal_03",
+  "input": "101023",
+  "expected": [
+   "1.0.10.23",
+   "1.0.102.3",
+   "10.1.0.23",
+   "10.10.2.3",
+   "101.0.2.3"
+  ],
+  "note": "Ket qua gom nhieu dia chi"
+ },
+ {
+  "group": "normal",
+  "name": "normal_04",
+  "input": "172161",
+  "expected": [
+   "1.7.2.161",
+   "1.7.21.61",
+   "1.7.216.1",
+   "1.72.1.61",
+   "1.72.16.1",
+   "17.2.1.61",
+   "17.2.16.1",
+   "17.21.6.1",
+   "172.1.6.1"
+  ],
+  "note": "6 chu so"
+ },
+ {
+  "group": "normal",
+  "name": "normal_05",
+  "input": "123456789",
+  "expected": [
+   "123.45.67.89"
+  ],
+  "note": "9 chu so"
+ },
+ {
+  "group": "boundary",
+  "name": "edge_min_len_4",
+  "input": "1111",
+  "expected": [
+   "1.1.1.1"
+  ],
+  "note": "Do dai toi thieu de co nghiem: 4"
+ },
+ {
+  "group": "boundary",
+  "name": "edge_max_len_12",
+  "input": "255255255255",
+  "expected": [
+   "255.255.255.255"
+  ],
+  "note": "Do dai toi da co nghiem: 12, dung 1 cach"
+ },
+ {
+  "group": "boundary",
+  "name": "edge_len_13",
+  "input": "1111111111111",
+  "expected": [],
+  "note": "13 chu so, vo nghiem"
+ },
+ {
+  "group": "boundary",
+  "name": "edge_len_3",
+  "input": "123",
+  "expected": [],
+  "note": "3 chu so, vo nghiem"
+ },
+ {
+  "group": "boundary",
+  "name": "edge_len_1",
+  "input": "1",
+  "expected": [],
+  "note": "1 chu so, vo nghiem"
+ },
+ {
+  "group": "boundary",
+  "name": "edge_all_zero_4",
+  "input": "0000",
+  "expected": [
+   "0.0.0.0"
+  ],
+  "note": "Chi co 0.0.0.0"
+ },
+ {
+  "group": "boundary",
+  "name": "edge_all_zero_12",
+  "input": "000000000000",
+  "expected": [],
+  "note": "Vo nghiem vi so 0 dau"
+ },
+ {
+  "group": "boundary",
+  "name": "edge_255_max",
+  "input": "255255255255",
+  "expected": [
+   "255.255.255.255"
+  ],
+  "note": "Moi doan = 255"
+ },
+ {
+  "group": "boundary",
+  "name": "edge_256",
+  "input": "256256256256",
+  "expected": [],
+  "note": "Moi doan 256 > 255, vo nghiem"
+ },
+ {
+  "group": "special",
+  "name": "special_leading_zero_1",
+  "input": "010010",
+  "expected": [
+   "0.10.0.10",
+   "0.100.1.0"
+  ],
+  "note": "So 0 dung dau doan nhieu chu so"
+ },
+ {
+  "group": "special",
+  "name": "special_leading_zero_2",
+  "input": "0100",
+  "expected": [
+   "0.1.0.0"
+  ],
+  "note": "Chi 0.1.0.0"
+ },
+ {
+  "group": "special",
+  "name": "special_leading_zero_3",
+  "input": "00000",
+  "expected": [],
+  "note": "0 dau, nhieu so 0"
+ },
+ {
+  "group": "special",
+  "name": "special_one_way_12",
+  "input": "111111111111",
+  "expected": [
+   "111.111.111.111"
+  ],
+  "note": "12 chu so 1, dung 1 cach 111.111.111.111"
+ },
+ {
+  "group": "special",
+  "name": "special_many_answers",
+  "input": "1111111",
+  "expected": [
+   "1.1.11.111",
+   "1.1.111.11",
+   "1.11.1.111",
+   "1.11.11.11",
+   "1.11.111.1",
+   "1.111.1.11",
+   "1.111.11.1",
+   "11.1.1.111",
+   "11.1.11.11",
+   "11.1.111.1",
+   "11.11.1.11",
+   "11.11.11.1",
+   "11.111.1.1",
+   "111.1.1.11",
+   "111.1.11.1",
+   "111.11.1.1"
+  ],
+  "note": "7 chu so 1, nhieu dap an"
+ },
+ {
+  "group": "special",
+  "name": "special_digits_10",
+  "input": "1234567890",
+  "expected": [],
+  "note": "10 chu so"
+ },
+ {
+  "group": "special",
+  "name": "special_255_mixed",
+  "input": "2552551113",
+  "expected": [
+   "255.25.51.113",
+   "255.255.1.113",
+   "255.255.11.13",
+   "255.255.111.3"
+  ],
+  "note": "Gia tri sat 255"
+ },
+ {
+  "group": "invalid",
+  "name": "invalid_letters",
+  "input": "12a45",
+  "expected": [],
+  "note": "Co ky tu khong phai so"
+ },
+ {
+  "group": "invalid",
+  "name": "invalid_empty",
+  "input": "",
+  "expected": [],
+  "note": "Chuoi rong"
+ },
+ {
+  "group": "random",
+  "name": "random_01",
+  "input": "318684858",
+  "expected": [],
+  "note": "Ngau nhien do dai 9"
+ },
+ {
+  "group": "random",
+  "name": "random_02",
+  "input": "222280381",
+  "expected": [],
+  "note": "Ngau nhien do dai 9"
+ },
+ {
+  "group": "random",
+  "name": "random_03",
+  "input": "3626",
+  "expected": [
+   "3.6.2.6"
+  ],
+  "note": "Ngau nhien do dai 4"
+ },
+ {
+  "group": "random",
+  "name": "random_04",
+  "input": "3353",
+  "expected": [
+   "3.3.5.3"
+  ],
+  "note": "Ngau nhien do dai 4"
+ },
+ {
+  "group": "random",
+  "name": "random_05",
+  "input": "7210643",
+  "expected": [
+   "7.2.106.43",
+   "7.210.6.43",
+   "7.210.64.3",
+   "72.10.6.43",
+   "72.10.64.3",
+   "72.106.4.3"
+  ],
+  "note": "Ngau nhien do dai 7"
+ },
+ {
+  "group": "random",
+  "name": "random_06",
+  "input": "0137",
+  "expected": [
+   "0.1.3.7"
+  ],
+  "note": "Ngau nhien do dai 4"
+ },
+ {
+  "group": "random",
+  "name": "random_07",
+  "input": "1164",
+  "expected": [
+   "1.1.6.4"
+  ],
+  "note": "Ngau nhien do dai 4"
+ },
+ {
+  "group": "random",
+  "name": "random_08",
+  "input": "316903287",
+  "expected": [],
+  "note": "Ngau nhien do dai 9"
+ },
+ {
+  "group": "random",
+  "name": "random_09",
+  "input": "23276",
+  "expected": [
+   "2.3.2.76",
+   "2.3.27.6",
+   "2.32.7.6",
+   "23.2.7.6"
+  ],
+  "note": "Ngau nhien do dai 5"
+ },
+ {
+  "group": "random",
+  "name": "random_10",
+  "input": "3869",
+  "expected": [
+   "3.8.6.9"
+  ],
+  "note": "Ngau nhien do dai 4"
+ },
+ {
+  "group": "random",
+  "name": "random_11",
+  "input": "285341075",
+  "expected": [],
+  "note": "Ngau nhien do dai 9"
+ },
+ {
+  "group": "random",
+  "name": "random_12",
+  "input": "41998135",
+  "expected": [
+   "4.19.98.135",
+   "4.199.8.135",
+   "4.199.81.35",
+   "41.9.98.135",
+   "41.99.8.135",
+   "41.99.81.35"
+  ],
+  "note": "Ngau nhien do dai 8"
+ },
+ {
+  "group": "random",
+  "name": "random_13",
+  "input": "14110108113",
+  "expected": [
+   "14.110.108.113",
+   "141.10.108.113"
+  ],
+  "note": "Ngau nhien do dai 11"
+ },
+ {
+  "group": "random",
+  "name": "random_14",
+  "input": "85830140",
+  "expected": [
+   "8.58.30.140",
+   "85.8.30.140",
+   "85.83.0.140"
+  ],
+  "note": "Ngau nhien do dai 8"
+ },
+ {
+  "group": "random",
+  "name": "random_15",
+  "input": "01224242",
+  "expected": [
+   "0.1.224.242",
+   "0.12.24.242",
+   "0.12.242.42",
+   "0.122.4.242",
+   "0.122.42.42"
+  ],
+  "note": "Ngau nhien do dai 8"
+ },
+ {
+  "group": "random",
+  "name": "random_small_alpha_01",
+  "input": "1001511221",
+  "expected": [
+   "100.15.11.221",
+   "100.15.112.21",
+   "100.151.1.221",
+   "100.151.12.21",
+   "100.151.122.1"
+  ],
+  "note": "Ngau nhien bang chu so 0125, do dai 10"
+ },
+ {
+  "group": "random",
+  "name": "random_small_alpha_02",
+  "input": "1202",
+  "expected": [
+   "1.2.0.2"
+  ],
+  "note": "Ngau nhien bang chu so 0125, do dai 4"
+ },
+ {
+  "group": "random",
+  "name": "random_small_alpha_03",
+  "input": "521112212200",
+  "expected": [],
+  "note": "Ngau nhien bang chu so 0125, do dai 12"
+ },
+ {
+  "group": "random",
+  "name": "random_small_alpha_04",
+  "input": "505210",
+  "expected": [
+   "5.0.5.210",
+   "5.0.52.10",
+   "50.5.2.10",
+   "50.5.21.0",
+   "50.52.1.0"
+  ],
+  "note": "Ngau nhien bang chu so 0125, do dai 6"
+ },
+ {
+  "group": "random",
+  "name": "random_small_alpha_05",
+  "input": "12202150",
+  "expected": [
+   "1.2.202.150",
+   "1.220.2.150",
+   "1.220.21.50",
+   "1.220.215.0",
+   "12.20.2.150",
+   "12.20.21.50",
+   "12.20.215.0",
+   "12.202.1.50",
+   "12.202.15.0",
+   "122.0.2.150",
+   "122.0.21.50",
+   "122.0.215.0"
+  ],
+  "note": "Ngau nhien bang chu so 0125, do dai 8"
+ },
+ {
+  "group": "large",
+  "name": "large_100_ones",
+  "input": "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+  "expected": [],
+  "note": "100 chu so, vo nghiem, kiem tra cat tia"
+ },
+ {
+  "group": "large",
+  "name": "large_100_random",
+  "input": "8937456608298718999128500221005494747992792078466591979296654066921986813104862188907946066120789056",
+  "expected": [],
+  "note": "100 chu so ngau nhien"
+ },
+ {
+  "group": "large",
+  "name": "large_100_zeros",
+  "input": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "expected": [],
+  "note": "100 so 0"
+ },
+ {
+  "group": "large",
+  "name": "large_13_ones",
+  "input": "1111111111111",
+  "expected": [],
+  "note": "13 chu so, vuot 12"
+ }
+]

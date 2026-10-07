@@ -1,0 +1,57 @@
+[
+  {
+    "name": "intro",
+    "caption": "Bài tập lớn CS112: Khôi phục địa chỉ IP bằng Quay lui (Backtracking)",
+    "speech": "Em xin trình bày bài tập lớn môn Phân tích và Thiết kế Thuật toán. Em chọn bài Địa chỉ ai pi trong Lab một của Wecode. Bài này bắt buộc dùng kỹ thuật quay lui, và em xây dựng một ứng dụng web để trực quan hóa từng bước giải."
+  },
+  {
+    "name": "problem",
+    "caption": "Input: chuỗi s gồm 1 đến 100 chữ số. Output: mọi địa chỉ IP hợp lệ ghép được từ s.",
+    "speech": "Đầu vào là một chuỗi s gồm các chữ số, dài không quá một trăm, vì các dấu chấm đã bị mất. Đầu ra là mọi địa chỉ ai pi hợp lệ có thể ghép từ chuỗi đó. Một địa chỉ hợp lệ gồm bốn đoạn. Mỗi đoạn có một đến ba chữ số, giá trị từ không đến hai trăm năm mươi lăm, và không được có số không đứng đầu, trừ chính số không. Ví dụ, chuỗi hai năm năm hai năm năm một một một ba năm có hai đáp án."
+  },
+  {
+    "name": "idea",
+    "caption": "Chọn lần lượt 4 đoạn, thử độ dài 1 đến 3. Loại đoạn sai, tỉa nhánh theo độ dài còn lại.",
+    "speech": "Ý tưởng là chọn lần lượt từng đoạn. Ở mỗi vị trí, ta thử cắt một, hai hoặc ba chữ số. Nếu đoạn có số không đứng đầu, hoặc lớn hơn hai trăm năm mươi lăm, thì loại ngay, và các đoạn dài hơn cũng sai nên dừng vòng lặp. Ngoài ra còn một điều kiện cắt tỉa. Nếu số chữ số còn lại ít hơn số đoạn cần tối thiểu, hoặc nhiều hơn ba lần số đoạn còn lại, thì bỏ cả nhánh. Mã giả nằm ở bên phải, dòng nào đang chạy sẽ được tô sáng."
+  },
+  {
+    "name": "step",
+    "caption": "Chạy từng bước: dải chữ số tô màu 4 đoạn, cây quay lui lớn dần, nhật ký ghi lý do.",
+    "speech": "Ở chế độ từng bước, mỗi lần bấm là một thao tác của thuật toán. Dải chữ số được tô màu theo bốn đoạn đã chọn, cây quay lui bên dưới mọc thêm nút, và nhật ký ghi rõ lý do. Ví dụ, đoạn thứ nhất thử số hai, nhưng còn dư mười chữ số, nhiều hơn chín, nên nhánh này bị tỉa. Rồi thử hai năm, hợp lệ, và thuật toán đi sâu vào nhánh này."
+  },
+  {
+    "name": "run",
+    "caption": "Chạy tự động: tìm ra 255.255.11.135 và 255.255.111.35, trùng đáp án mẫu.",
+    "speech": "Chạy tự động đến hết. Thuật toán duyệt mười chín nút, thử hai mươi đoạn, loại hai đoạn sai, tỉa mười nhánh, rồi tìm ra đúng hai địa chỉ. Hai trăm năm mươi lăm chấm hai trăm năm mươi lăm chấm mười một chấm một trăm ba mươi lăm. Và hai trăm năm mươi lăm chấm hai trăm năm mươi lăm chấm một trăm mười một chấm ba mươi lăm. Trùng với đáp án mẫu của đề."
+  },
+  {
+    "name": "compare",
+    "caption": "So sánh 3 cách: vét cạn 120 phép thử, quay lui 83, quay lui có cắt tỉa 20.",
+    "speech": "Nút so sánh chạy cùng một chuỗi bằng ba cách. Vét cạn thử một trăm hai mươi cách cắt. Quay lui không cắt tỉa thử tám mươi ba đoạn. Còn quay lui có cắt tỉa chỉ thử hai mươi đoạn. Cả ba cách cho cùng tập kết quả."
+  },
+  {
+    "name": "options",
+    "caption": "Tùy chọn: tắt cắt tỉa (19 nút thành 71 nút), sinh chuỗi ngẫu nhiên có nghiệm, chọn test mẫu.",
+    "speech": "Ngoài ra, ứng dụng còn vài tùy chọn. Công tắc cắt tỉa cho phép tắt phép cắt theo độ dài. Khi tắt, cùng chuỗi hai năm năm hai năm năm một một một ba năm phải duyệt bảy mươi mốt nút, thay vì mười chín nút. Nút sinh chuỗi ngẫu nhiên luôn tạo ra chuỗi có nghiệm. Và danh sách test mẫu cho chọn nhanh các trường hợp biên."
+  },
+  {
+    "name": "leading_zero",
+    "caption": "Chuỗi 010010: các đoạn có số 0 đứng đầu bị loại (nút đỏ). Kết quả: 0.10.0.10 và 0.100.1.0.",
+    "speech": "Với chuỗi không một không không một không, những đoạn có số không đứng đầu bị loại ngay, hiện màu đỏ trên cây. Chỉ còn hai đáp án. Không chấm mười chấm không chấm mười. Và không chấm một trăm chấm một chấm không."
+  },
+  {
+    "name": "big",
+    "caption": "Chuỗi 100 chữ số 1: tỉa ngay tại gốc, vét cạn phải thử 156.849 cách cắt.",
+    "speech": "Với chuỗi một trăm chữ số một, phép cắt tỉa phát hiện ngay tại nút gốc rằng không thể có nghiệm, nên chỉ duyệt một nút. Trong khi vét cạn phải thử một trăm năm mươi sáu nghìn tám trăm bốn mươi chín cách cắt. Lưu ý, với chuỗi rất ngắn thì vét cạn đôi khi còn ít phép thử hơn. Ví dụ chuỗi không một không không một không chỉ cần mười phép thử, so với mười sáu của quay lui. Cắt tỉa chỉ thật sự có lợi khi chuỗi dài."
+  },
+  {
+    "name": "tests",
+    "caption": "Bộ 48 testcase, 7 nhóm. Đáp án sinh bằng vét cạn. Kết quả: đạt 48/48.",
+    "speech": "Bộ testcase gồm bốn mươi tám test, chia thành bảy nhóm. Gồm mẫu, thông thường, biên, đặc biệt, không hợp lệ, ngẫu nhiên và dữ liệu lớn. Đáp án được sinh bằng cách vét cạn, độc lập với thuật toán quay lui. Chạy toàn bộ, cả bốn mươi tám test đều đạt."
+  },
+  {
+    "name": "outro",
+    "caption": "Cảm ơn cô đã theo dõi.",
+    "speech": "Ứng dụng được xây dựng với sự hỗ trợ của trợ lý trí tuệ nhân tạo. Quá trình làm, các lỗi gặp phải và cách kiểm chứng được trình bày trong báo cáo. Em cảm ơn cô đã theo dõi."
+  }
+]

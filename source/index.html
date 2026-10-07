@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CS112 - IP Address Restore Visualizer (Backtracking)</title>
+<style>
+  :root {
+    --bg: #0c0f17; --surface: #141923; --surface2: #1b2230; --cell: #1f2737;
+    --border: #242d3d; --border2: #334155;
+    --text: #f1f5f9; --text2: #94a3b8; --text3: #64748b;
+    --blue: #38bdf8; --green: #4ade80; --red: #f87171; --amber: #fbbf24; --orange: #fb923c; --purple: #c084fc;
+    --seg0: #38bdf8; --seg1: #4ade80; --seg2: #c084fc; --seg3: #fb923c;
+    --mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    --sans: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+  header { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  header .chip { font: 600 12px var(--mono); color: var(--blue); border: 1px solid var(--blue); padding: 3px 10px; border-radius: 8px; }
+  header h1 { font-size: 20px; font-weight: 800; }
+  header p { color: var(--text2); font-size: 13px; }
+  main { padding: 18px 28px 40px; display: grid; gap: 16px; max-width: 1760px; margin: 0 auto; }
+  .row2 { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; min-width: 0; }
+  .panel-title { font-weight: 700; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--text2); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .panel-title .sub { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--text3); font-size: 12px; }
+  label.f { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+  input[type=text], select { width: 100%; background: var(--cell); border: 1px solid var(--border2); color: var(--text); border-radius: 8px; padding: 8px 10px; font: 600 15px var(--mono); }
+  select { font: 500 13px var(--sans); }
+  input[type=text]:focus, select:focus { outline: 2px solid var(--blue); outline-offset: 0; }
+  .err { color: var(--red); font-size: 12px; min-height: 18px; margin-top: 4px; }
+  .ctrl { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+  .btn { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 14px; font: 600 13px var(--sans); cursor: pointer; }
+  .btn:hover:not(:disabled) { border-color: var(--blue); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn.run { background: #0e4a63; border-color: var(--blue); }
+  .btn.sm { padding: 5px 10px; font-size: 12px; }
+  .inline { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--text2); }
+  .inline input[type=range] { width: 150px; accent-color: var(--blue); }
+  .chk { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--text); cursor: pointer; }
+  .chk input { accent-color: var(--green); width: 16px; height: 16px; }
+
+  .strip-wrap { background: var(--cell); border: 1px solid var(--border); border-radius: 10px; padding: 12px; min-height: 92px; }
+  .strip { display: flex; flex-wrap: wrap; gap: 3px; align-items: flex-end; }
+  .dg { width: 34px; height: 42px; display: flex; align-items: center; justify-content: center; font: 700 20px var(--mono); border-radius: 6px; background: #273146; color: var(--text2); border: 2px solid transparent; transition: background .15s, border-color .15s; }
+  .strip.small .dg { width: 22px; height: 28px; font-size: 13px; border-radius: 4px; }
+  .dg.seg0 { background: rgba(56,189,248,.22); color: var(--seg0); border-color: var(--seg0); }
+  .dg.seg1 { background: rgba(74,222,128,.2); color: var(--seg1); border-color: var(--seg1); }
+  .dg.seg2 { background: rgba(192,132,252,.2); color: var(--seg2); border-color: var(--seg2); }
+  .dg.seg3 { background: rgba(251,146,60,.22); color: var(--seg3); border-color: var(--seg3); }
+  .dg.cand.test { background: rgba(251,191,36,.25); color: var(--amber); border-color: var(--amber); }
+  .dg.cand.bad { background: rgba(248,113,113,.28); color: var(--red); border-color: var(--red); }
+  .dot { font: 800 22px var(--mono); color: var(--text); width: 12px; text-align: center; align-self: flex-end; padding-bottom: 2px; }
+  .strip.small .dot { font-size: 15px; width: 8px; }
+  .curip { margin-top: 10px; font: 700 22px var(--mono); min-height: 34px; letter-spacing: .02em; }
+  .curip .c { color: var(--amber); }
+  .curip .bad { color: var(--red); text-decoration: line-through; }
+  .status { margin-top: 6px; padding: 8px 12px; background: var(--surface2); border-left: 3px solid var(--blue); border-radius: 6px; font-size: 13px; min-height: 40px; }
+  .status.good { border-left-color: var(--green); }
+  .status.bad { border-left-color: var(--red); }
+  .status.warn { border-left-color: var(--orange); }
+
+  .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; }
+  .stat { background: var(--cell); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
+  .stat b { display: block; font: 700 18px var(--mono); }
+  .stat span { font-size: 11px; color: var(--text3); }
+
+  .code { font: 500 13px/1.75 var(--mono); background: var(--cell); border-radius: 10px; padding: 10px 6px; border: 1px solid var(--border); }
+  .code .ln { display: block; padding: 0 10px; border-left: 3px solid transparent; white-space: pre; transition: background .12s; }
+  .code .ln i { color: var(--text3); font-style: normal; display: inline-block; width: 22px; user-select: none; }
+  .code .ln em { color: var(--text3); font-style: normal; }
+  .code .ln.on { background: rgba(56,189,248,.18); border-left-color: var(--blue); }
+  .code .ln.off { opacity: .35; text-decoration: line-through; }
+  .log { font: 12px/1.6 var(--mono); background: var(--cell); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; height: 150px; overflow-y: auto; margin-top: 10px; }
+  .log div { color: var(--text2); }
+  .log div.g { color: var(--green); } .log div.r { color: var(--red); } .log div.o { color: var(--orange); } .log div.b { color: var(--blue); }
+
+  .tree-wrap { overflow: auto; background: var(--cell); border: 1px solid var(--border); border-radius: 10px; height: 430px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text2); margin-top: 8px; }
+  .legend span::before { content: ''; display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+  svg text { font-family: var(--mono); }
+  .tn rect { stroke-width: 2; transition: fill .15s; }
+  .tn.testing rect { fill: rgba(251,191,36,.3); stroke: var(--amber); }
+  .tn.open rect { fill: rgba(56,189,248,.22); stroke: var(--blue); }
+  .tn.ok rect { fill: rgba(56,189,248,.14); stroke: var(--green); }
+  .tn.dead rect { fill: #2a3346; stroke: #475569; }
+  .tn.rejected rect { fill: rgba(248,113,113,.28); stroke: var(--red); }
+  .tn.pruned rect { fill: rgba(251,146,60,.3); stroke: var(--orange); }
+  .tn.solution rect { fill: rgba(74,222,128,.4); stroke: var(--green); }
+  .tn.active rect { stroke: #fff; stroke-width: 3; filter: drop-shadow(0 0 6px rgba(255,255,255,.7)); }
+  .tn text { fill: var(--text); font-size: 12px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+  .te { stroke: #475569; stroke-width: 1.5; fill: none; }
+
+  .results { display: flex; flex-wrap: wrap; gap: 6px; max-height: 150px; overflow-y: auto; }
+  .ipchip { font: 600 13px var(--mono); background: rgba(74,222,128,.14); color: var(--green); border: 1px solid rgba(74,222,128,.5); padding: 3px 10px; border-radius: 8px; }
+  .empty { color: var(--text3); font-size: 13px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text2); font-weight: 600; font-size: 12px; }
+  td.num { font-family: var(--mono); }
+  .bar { height: 8px; background: var(--blue); border-radius: 4px; min-width: 2px; }
+  .badge { font: 700 11px var(--mono); padding: 2px 8px; border-radius: 6px; }
+  .badge.ok { background: rgba(74,222,128,.2); color: var(--green); }
+  .badge.fail { background: rgba(248,113,113,.25); color: var(--red); }
+  .tests-box { max-height: 280px; overflow-y: auto; margin-top: 8px; }
+  .sum { margin-top: 8px; font-weight: 700; }
+  .note { color: var(--text3); font-size: 12px; margin-top: 8px; }
+  @media (max-width: 1100px) { .row2 { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(3, 1fr); } }
+</style>
+</head>
+<body>
+<header>
+  <span class="chip">CS112 · Phân Tích &amp; Thiết Kế Thuật Toán</span>
+  <h1>IP Address Restore Visualizer</h1>
+  <p>Khôi phục địa chỉ IP từ chuỗi chữ số đã mất dấu chấm, bằng Quay lui (Backtracking)</p>
+</header>
+<main>
+  <div class="row2">
+    <section class="panel" id="inputPanel">
+      <div class="panel-title">Đầu vào &amp; Điều khiển <span class="sub">s gồm 1 đến 100 chữ số</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="f" for="inputStr">Chuỗi s (Input)</label>
+          <input type="text" id="inputStr" value="25525511135" maxlength="120" autocomplete="off" spellcheck="false">
+          <div class="err" id="inputErr"></div>
+        </div>
+        <div>
+          <label class="f" for="presetSelect">Test mẫu</label>
+          <select id="presetSelect"></select>
+          <div class="ctrl" style="margin-top:6px"><button class="btn sm" id="btnRandom">Sinh chuỗi ngẫu nhiên có nghiệm</button></div>
+        </div>
+      </div>
+      <div class="ctrl">
+        <button class="btn run" id="btnPlay">▶ Bắt đầu giải</button>
+        <button class="btn" id="btnStep">⏭ Từng bước</button>
+        <button class="btn" id="btnReset">↺ Làm lại</button>
+        <label class="chk"><input type="checkbox" id="chkPrune" checked> Cắt tỉa theo độ dài còn lại</label>
+      </div>
+      <div class="ctrl">
+        <div class="inline">Tốc độ:
+          <span>chậm</span><input type="range" id="speedRange" min="5" max="800" step="5" value="260"><span>nhanh</span>
+          <span id="speedLabel">260 ms/bước</span>
+        </div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-title">Mã giả <span class="sub">dòng đang thực thi được tô sáng</span></div>
+      <div class="code" id="code"></div>
+    </section>
+  </div>
+
+  <div class="row2">
+    <section class="panel">
+      <div class="panel-title">Trạng thái chuỗi <span class="sub" id="stepCount">bước 0</span></div>
+      <div class="strip-wrap"><div class="strip" id="digitStrip"></div></div>
+      <div class="curip" id="curIp"></div>
+      <div class="status" id="statusText">Nhấn “Bắt đầu giải” hoặc “Từng bước”.</div>
+      <div class="stats">
+        <div class="stat"><b id="stCalls">0</b><span>nút đã duyệt</span></div>
+        <div class="stat"><b id="stTries">0</b><span>đoạn đã thử</span></div>
+        <div class="stat"><b id="stRejects">0</b><span>đoạn bị loại</span></div>
+        <div class="stat"><b id="stPrunes">0</b><span>nhánh bị tỉa</span></div>
+        <div class="stat"><b id="stSol">0</b><span>địa chỉ IP</span></div>
+        <div class="stat"><b id="stBrute">0</b><span>cách cắt vét cạn</span></div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-title">Nhật ký <span class="sub">mỗi bước một dòng</span></div>
+      <div class="log" id="logBox" style="height:244px;margin-top:0"></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-title">Cây quay lui <span class="sub">mỗi nút là một đoạn đã chọn, gốc ∅ là chưa chọn gì</span></div>
+    <div class="tree-wrap" id="treeWrap"><svg id="treeSvg" width="600" height="320"></svg></div>
+    <div class="legend">
+      <span style="--c:var(--amber)">đang thử</span>
+      <span style="--c:var(--blue)">hợp lệ, đang xét tiếp</span>
+      <span style="--c:var(--red)">bị loại (0 đầu hoặc &gt; 255)</span>
+      <span style="--c:var(--orange)">bị tỉa theo độ dài</span>
+      <span style="--c:var(--green)">địa chỉ IP hoàn chỉnh</span>
+      <span style="--c:#475569">đã duyệt xong, không có nghiệm</span>
+    </div>
+  </section>
+
+  <div class="row2">
+    <section class="panel">
+      <div class="panel-title">Kết quả (Output) <span class="sub" id="resCount">0 địa chỉ</span></div>
+      <div class="results" id="resultList"><span class="empty">Chưa có kết quả.</span></div>
+    </section>
+    <section class="panel">
+      <div class="panel-title">So sánh 3 cách giải trên chuỗi hiện tại <span class="sub"><button class="btn sm" id="btnCompare">So sánh</button></span></div>
+      <div id="compareBox"><span class="empty">Nhấn “So sánh” để chạy vét cạn, quay lui không cắt tỉa và quay lui có cắt tỉa.</span></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-title">Bộ testcase <span class="sub"><button class="btn sm" id="btnRunTests">Chạy toàn bộ testcase</button></span></div>
+    <div class="sum" id="testSummary"><span class="empty">Chạy từng testcase bằng quay lui có cắt tỉa, so với đáp án sinh bởi vét cạn.</span></div>
+    <div class="tests-box" id="testsBox"></div>
+  </section>
+</main>
+
+<script>
+// ==== CORE BEGIN ====
+const MAX_LEN = 100;
+const PSEUDO = [
+  ['Backtrack(pos, parts):', ''],
+  ['  k ← |parts| ; left ← n − pos', ''],
+  ['  if left < 4−k  or  left > 3·(4−k): return', '  ▸ tỉa theo độ dài'],
+  ['  if k = 4: nếu pos = n thì ghi nhận parts ; return', ''],
+  ['  for len = 1 to 3:', ''],
+  ['    if pos + len > n: break', '  ▸ hết ký tự'],
+  ['    seg ← s[pos .. pos+len)', ''],
+  ['    if len > 1 and seg[0] = "0": break', '  ▸ số 0 đứng đầu'],
+  ['    if int(seg) > 255: break', '  ▸ vượt 255'],
+  ['    parts.push(seg); Backtrack(pos+len, parts); parts.pop()', '']
+];
+
+function isDigits(s) { return /^[0-9]+$/.test(s); }
+
+function newCtx(s, prune) {
+  return {
+    s, n: s.length, prune,
+    tree: [{ id: 0, parent: -1, seg: '', depth: 0, status: 'open', children: [], reason: '', hasSol: false }],
+    results: [],
+    stats: { calls: 0, tries: 0, rejects: 0, prunes: 0, solutions: 0 },
+  };
+}
+
+function addNode(ctx, parent, seg, status) {
+  const node = { id: ctx.tree.length, parent: parent.id, seg, depth: parent.depth + 1, status, children: [], reason: '', hasSol: false };
+  ctx.tree.push(node);
+  parent.children.push(node.id);
+  return node;
+}
+
+function* backtrackGen(ctx) {
+  const { s, n, prune, stats, tree } = ctx;
+  const parts = [];
+
+  function* bt(pos, node) {
+    const k = parts.length;
+    const left = n - pos;
+    stats.calls++;
+    yield { t: 'enter', line: 1, node: node.id, parts: parts.slice(), cand: null, cls: 'b',
+      msg: `Gọi Backtrack(pos=${pos}, parts=[${parts.join(', ')}]): đã có k=${k} đoạn, còn ${left} chữ số.` };
+
+    if (prune && (left < 4 - k || left > 3 * (4 - k))) {
+      node.status = 'pruned';
+      node.reason = 'length';
+      stats.prunes++;
+      const why = left < 4 - k ? `còn ${left} chữ số, ít hơn ${4 - k} đoạn cần tối thiểu 1 chữ số` : `còn ${left} chữ số, nhiều hơn ${3 * (4 - k)} (tối đa 3 chữ số mỗi đoạn)`;
+      yield { t: 'prune', line: 2, node: node.id, parts: parts.slice(), cand: null, cls: 'o', tone: 'warn',
+        msg: `Cắt tỉa nhánh: ${why}. Không thể ra nghiệm.` };
+      return false;
+    }
+
+    if (k === 4) {
+      if (pos === n) {
+        node.status = 'solution';
+        for (let p = node; p; p = tree[p.parent]) { p.hasSol = true; if (p.parent < 0) break; }
+        const ip = parts.join('.');
+        ctx.results.push(ip);
+        stats.solutions++;
+        yield { t: 'solution', line: 3, node: node.id, parts: parts.slice(), cand: null, cls: 'g', tone: 'good',
+          msg: `Đủ 4 đoạn và dùng hết chuỗi: ghi nhận ${ip}.` };
+        return true;
+      }
+      node.status = 'pruned';
+      node.reason = 'dead';
+      stats.prunes++;
+      yield { t: 'deadend', line: 3, node: node.id, parts: parts.slice(), cand: null, cls: 'o', tone: 'warn',
+        msg: `Đủ 4 đoạn nhưng còn dư ${left} chữ số: bỏ nhánh.` };
+      return false;
+    }
+
+    let found = false;
+    for (let len = 1; len <= 3; len++) {
+      if (pos + len > n) {
+        yield { t: 'stop', line: 5, node: node.id, parts: parts.slice(), cand: null, cls: '',
+          msg: `len=${len}: vượt quá cuối chuỗi, dừng vòng lặp ở nút này.` };
+        break;
+      }
+      const seg = s.substr(pos, len);
+      const child = addNode(ctx, node, seg, 'testing');
+      stats.tries++;
+      yield { t: 'try', line: 6, node: child.id, parts: parts.slice(), cand: { pos, len }, cls: '', tone: '',
+        msg: `Thử đoạn thứ ${k + 1} = "${seg}" (len=${len}).` };
+
+      if (len > 1 && seg[0] === '0') {
+        child.status = 'rejected';
+        child.reason = 'lead0';
+        stats.rejects++;
+        yield { t: 'reject', line: 7, node: child.id, parts: parts.slice(), cand: { pos, len }, cls: 'r', tone: 'bad',
+          msg: `Loại "${seg}": số 0 đứng đầu. Mọi đoạn dài hơn cũng sai nên break.` };
+        break;
+      }
+      if (parseInt(seg, 10) > 255) {
+        child.status = 'rejected';
+        child.reason = 'gt255';
+        stats.rejects++;
+        yield { t: 'reject', line: 8, node: child.id, parts: parts.slice(), cand: { pos, len }, cls: 'r', tone: 'bad',
+          msg: `Loại "${seg}": ${parseInt(seg, 10)} > 255. Mọi đoạn dài hơn còn lớn hơn nên break.` };
+        break;
+      }
+
+      child.status = 'open';
+      parts.push(seg);
+      yield { t: 'accept', line: 9, node: child.id, parts: parts.slice(), cand: null, cls: 'b',
+        msg: `"${seg}" hợp lệ, đưa vào parts rồi đệ quy.` };
+      const r = yield* bt(pos + len, child);
+      parts.pop();
+      if (r) found = true;
+      yield { t: 'back', line: 9, node: node.id, parts: parts.slice(), cand: null, cls: '',
+        msg: `Quay lui về nút cũ (pos=${pos}), bỏ "${seg}" khỏi parts.` };
+    }
+    if (node.status === 'open') node.status = found ? 'ok' : 'dead';
+    return found;
+  }
+
+  yield* bt(0, tree[0]);
+  yield { t: 'end', line: 0, node: 0, parts: [], cand: null, cls: 'g', tone: 'good',
+    msg: `Hoàn tất: ${stats.solutions} địa chỉ IP, đã duyệt ${stats.calls} nút và thử ${stats.tries} đoạn.` };
+}
+
+function runAll(s, prune) {
+  const ctx = newCtx(s, prune);
+  if (isDigits(s)) { for (const _ of backtrackGen(ctx)) { /* drain */ } }
+  return ctx;
+}
+
+function validSeg(seg) {
+  return seg.length >= 1 && seg.length <= 3 && (seg.length === 1 || seg[0] !== '0') && parseInt(seg, 10) <= 255;
+}
+
+function bruteForce(s) {
+  const n = s.length, results = [];
+  let checks = 0;
+  if (!isDigits(s)) return { results, checks };
+  for (let a = 1; a < n - 2; a++)
+    for (let b = a + 1; b < n - 1; b++)
+      for (let c = b + 1; c < n; c++) {
+        checks++;
+        const x = s.slice(0, a), y = s.slice(a, b), z = s.slice(b, c), w = s.slice(c);
+        if (validSeg(x) && validSeg(y) && validSeg(z) && validSeg(w)) results.push(x + '.' + y + '.' + z + '.' + w);
+      }
+  return { results, checks };
+}
+
+function combos3(n) { return n < 4 ? 0 : ((n - 1) * (n - 2) * (n - 3)) / 6; }
+function canon(arr) { return arr.slice().sort().join('|'); }
+
+function randomSolvable() {
+  const o = () => String(Math.random() < 0.35 ? Math.floor(Math.random() * 10) : Math.floor(Math.random() * 256));
+  return o() + o() + o() + o();
+}
+// ==== CORE END ====
+
+const TESTS = /*TESTS_BEGIN*/[{"group": "sample", "name": "sample_de_bai", "input": "25525511135", "expected": ["255.255.11.135", "255.255.111.35"]}, {"group": "normal", "name": "normal_01", "input": "192168001001", "expected": []}, {"group": "normal", "name": "normal_02", "input": "1921681", "expected": ["1.9.216.81", "1.92.16.81", "1.92.168.1", "19.2.16.81", "19.2.168.1", "19.21.6.81", "19.21.68.1", "19.216.8.1", "192.1.6.81", "192.1.68.1", "192.16.8.1"]}, {"group": "normal", "name": "normal_03", "input": "101023", "expected": ["1.0.10.23", "1.0.102.3", "10.1.0.23", "10.10.2.3", "101.0.2.3"]}, {"group": "normal", "name": "normal_04", "input": "172161", "expected": ["1.7.2.161", "1.7.21.61", "1.7.216.1", "1.72.1.61", "1.72.16.1", "17.2.1.61", "17.2.16.1", "17.21.6.1", "172.1.6.1"]}, {"group": "normal", "name": "normal_05", "input": "123456789", "expected": ["123.45.67.89"]}, {"group": "boundary", "name": "edge_min_len_4", "input": "1111", "expected": ["1.1.1.1"]}, {"group": "boundary", "name": "edge_max_len_12", "input": "255255255255", "expected": ["255.255.255.255"]}, {"group": "boundary", "name": "edge_len_13", "input": "1111111111111", "expected": []}, {"group": "boundary", "name": "edge_len_3", "input": "123", "expected": []}, {"group": "boundary", "name": "edge_len_1", "input": "1", "expected": []}, {"group": "boundary", "name": "edge_all_zero_4", "input": "0000", "expected": ["0.0.0.0"]}, {"group": "boundary", "name": "edge_all_zero_12", "input": "000000000000", "expected": []}, {"group": "boundary", "name": "edge_255_max", "input": "255255255255", "expected": ["255.255.255.255"]}, {"group": "boundary", "name": "edge_256", "input": "256256256256", "expected": []}, {"group": "special", "name": "special_leading_zero_1", "input": "010010", "expected": ["0.10.0.10", "0.100.1.0"]}, {"group": "special", "name": "special_leading_zero_2", "input": "0100", "expected": ["0.1.0.0"]}, {"group": "special", "name": "special_leading_zero_3", "input": "00000", "expected": []}, {"group": "special", "name": "special_one_way_12", "input": "111111111111", "expected": ["111.111.111.111"]}, {"group": "special", "name": "special_many_answers", "input": "1111111", "expected": ["1.1.11.111", "1.1.111.11", "1.11.1.111", "1.11.11.11", "1.11.111.1", "1.111.1.11", "1.111.11.1", "11.1.1.111", "11.1.11.11", "11.1.111.1", "11.11.1.11", "11.11.11.1", "11.111.1.1", "111.1.1.11", "111.1.11.1", "111.11.1.1"]}, {"group": "special", "name": "special_digits_10", "input": "1234567890", "expected": []}, {"group": "special", "name": "special_255_mixed", "input": "2552551113", "expected": ["255.25.51.113", "255.255.1.113", "255.255.11.13", "255.255.111.3"]}, {"group": "invalid", "name": "invalid_letters", "input": "12a45", "expected": []}, {"group": "invalid", "name": "invalid_empty", "input": "", "expected": []}, {"group": "random", "name": "random_01", "input": "318684858", "expected": []}, {"group": "random", "name": "random_02", "input": "222280381", "expected": []}, {"group": "random", "name": "random_03", "input": "3626", "expected": ["3.6.2.6"]}, {"group": "random", "name": "random_04", "input": "3353", "expected": ["3.3.5.3"]}, {"group": "random", "name": "random_05", "input": "7210643", "expected": ["7.2.106.43", "7.210.6.43", "7.210.64.3", "72.10.6.43", "72.10.64.3", "72.106.4.3"]}, {"group": "random", "name": "random_06", "input": "0137", "expected": ["0.1.3.7"]}, {"group": "random", "name": "random_07", "input": "1164", "expected": ["1.1.6.4"]}, {"group": "random", "name": "random_08", "input": "316903287", "expected": []}, {"group": "random", "name": "random_09", "input": "23276", "expected": ["2.3.2.76", "2.3.27.6", "2.32.7.6", "23.2.7.6"]}, {"group": "random", "name": "random_10", "input": "3869", "expected": ["3.8.6.9"]}, {"group": "random", "name": "random_11", "input": "285341075", "expected": []}, {"group": "random", "name": "random_12", "input": "41998135", "expected": ["4.19.98.135", "4.199.8.135", "4.199.81.35", "41.9.98.135", "41.99.8.135", "41.99.81.35"]}, {"group": "random", "name": "random_13", "input": "14110108113", "expected": ["14.110.108.113", "141.10.108.113"]}, {"group": "random", "name": "random_14", "input": "85830140", "expected": ["8.58.30.140", "85.8.30.140", "85.83.0.140"]}, {"group": "random", "name": "random_15", "input": "01224242", "expected": ["0.1.224.242", "0.12.24.242", "0.12.242.42", "0.122.4.242", "0.122.42.42"]}, {"group": "random", "name": "random_small_alpha_01", "input": "1001511221", "expected": ["100.15.11.221", "100.15.112.21", "100.151.1.221", "100.151.12.21", "100.151.122.1"]}, {"group": "random", "name": "random_small_alpha_02", "input": "1202", "expected": ["1.2.0.2"]}, {"group": "random", "name": "random_small_alpha_03", "input": "521112212200", "expected": []}, {"group": "random", "name": "random_small_alpha_04", "input": "505210", "expected": ["5.0.5.210", "5.0.52.10", "50.5.2.10", "50.5.21.0", "50.52.1.0"]}, {"group": "random", "name": "random_small_alpha_05", "input": "12202150", "expected": ["1.2.202.150", "1.220.2.150", "1.220.21.50", "1.220.215.0", "12.20.2.150", "12.20.21.50", "12.20.215.0", "12.202.1.50", "12.202.15.0", "122.0.2.150", "122.0.21.50", "122.0.215.0"]}, {"group": "large", "name": "large_100_ones", "input": "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111", "expected": []}, {"group": "large", "name": "large_100_random", "input": "8937456608298718999128500221005494747992792078466591979296654066921986813104862188907946066120789056", "expected": []}, {"group": "large", "name": "large_100_zeros", "input": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "expected": []}, {"group": "large", "name": "large_13_ones", "input": "1111111111111", "expected": []}]/*TESTS_END*/;
+
+const PRESETS = [
+  ['25525511135', 'Ví dụ đề bài: 25525511135'],
+  ['1921681', 'Nhiều đáp án: 1921681'],
+  ['010010', 'Có số 0 đứng đầu: 010010'],
+  ['0000', 'Chỉ một đáp án: 0000'],
+  ['255255255255', 'Biên trên 12 chữ số: 255255255255'],
+  ['256256256256', 'Mọi đoạn vượt 255: 256256256256'],
+  ['123', 'Quá ngắn, vô nghiệm: 123'],
+  ['1111111111111', 'Quá dài, vô nghiệm (13 chữ số)'],
+  ['1'.repeat(100), 'Chuỗi 100 chữ số 1 (tỉa ngay ở gốc)'],
+];
+
+const $ = id => document.getElementById(id);
+let ctx = null, it = null, finished = true, running = false, timer = null, stepNo = 0, lastEv = null;
+
+function buildCode() {
+  $('code').innerHTML = PSEUDO.map((l, i) =>
+    `<span class="ln" id="l${i + 1}"><i>${i + 1}</i>${esc(l[0])}<em>${esc(l[1])}</em></span>`).join('');
+}
+function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function hl(line) {
+  document.querySelectorAll('#code .ln').forEach(e => e.classList.remove('on'));
+  if (line >= 1) { const e = $('l' + line); if (e) e.classList.add('on'); }
+}
+function setPruneLook() { $('l3').classList.toggle('off', !$('chkPrune').checked); }
+
+function readInput() {
+  const s = $('inputStr').value.trim();
+  if (s.length === 0) return { ok: false, msg: 'Chuỗi rỗng. Hãy nhập ít nhất 1 chữ số.' };
+  if (!isDigits(s)) return { ok: false, msg: 'Chuỗi chỉ được gồm chữ số 0 đến 9.' };
+  if (s.length > MAX_LEN) return { ok: false, msg: `Chuỗi dài ${s.length} ký tự, đề giới hạn ${MAX_LEN}.` };
+  return { ok: true, s };
+}
+
+function resetRun() {
+  stopTimer();
+  const inp = readInput();
+  $('inputErr').textContent = inp.ok ? '' : inp.msg;
+  ['btnPlay', 'btnStep', 'btnCompare'].forEach(id => $(id).disabled = !inp.ok);
+  stepNo = 0; lastEv = null; finished = false; running = false;
+  $('btnPlay').textContent = '▶ Bắt đầu giải';
+  $('logBox').innerHTML = '';
+  $('stepCount').textContent = 'bước 0';
+  hl(0);
+  if (!inp.ok) {
+    ctx = newCtx('', true); it = null; finished = true;
+    renderAll(null);
+    setStatus(inp.msg, 'bad');
+    return;
+  }
+  ctx = newCtx(inp.s, $('chkPrune').checked);
+  it = backtrackGen(ctx);
+  $('compareBox').innerHTML = '<span class="empty">Nhấn “So sánh” để chạy vét cạn, quay lui không cắt tỉa và quay lui có cắt tỉa.</span>';
+  renderAll(null);
+  setStatus('Sẵn sàng. Nhấn “Bắt đầu giải” hoặc “Từng bước”.', '');
+}
+
+function setStatus(msg, tone) {
+  const e = $('statusText');
+  e.textContent = msg;
+  e.className = 'status' + (tone ? ' ' + tone : '');
+}
+
+function stepOnce() {
+  if (!it || finished) return false;
+  const r = it.next();
+  if (r.done) { finished = true; return false; }
+  const ev = r.value;
+  stepNo++;
+  lastEv = ev;
+  renderAll(ev);
+  const d = document.createElement('div');
+  if (ev.cls) d.className = ev.cls;
+  d.textContent = `#${stepNo} ${ev.msg}`;
+  const box = $('logBox');
+  box.appendChild(d);
+  while (box.childElementCount > 500) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+  if (ev.t === 'end') { finished = true; stopTimer(); $('btnPlay').textContent = '↺ Chạy lại'; }
+  return true;
+}
+
+function stopTimer() { running = false; if (timer) { clearTimeout(timer); timer = null; } }
+
+function loop() {
+  if (!running) return;
+  const ok = stepOnce();
+  if (!ok || finished) { running = false; return; }
+  timer = setTimeout(loop, +$('speedRange').value);
+}
+
+function togglePlay() {
+  if (finished) { resetRun(); if (!it) return; }
+  if (running) { stopTimer(); $('btnPlay').textContent = '▶ Tiếp tục'; return; }
+  running = true;
+  $('btnPlay').textContent = '⏸ Tạm dừng';
+  loop();
+}
+
+function renderAll(ev) {
+  renderStrip(ev);
+  renderStats();
+  renderResults();
+  renderTree(ev ? ev.node : -1);
+  $('stepCount').textContent = 'bước ' + stepNo;
+  if (ev) { hl(ev.line); setStatus(ev.msg, ev.tone || ''); }
+}
+
+function renderStrip(ev) {
+  const s = ctx.s, n = s.length;
+  const parts = ev ? ev.parts : [];
+  const cand = ev ? ev.cand : null;
+  const owner = new Array(n).fill(-1), endAt = new Set();
+  let idx = 0;
+  parts.forEach((p, i) => { for (let j = 0; j < p.length; j++) owner[idx + j] = i; idx += p.length; endAt.add(idx - 1); });
+  let html = '';
+  for (let i = 0; i < n; i++) {
+    let cls = 'dg';
+    if (owner[i] >= 0) cls += ' seg' + (owner[i] % 4);
+    else if (cand && i >= cand.pos && i < cand.pos + cand.len) cls += ' cand ' + (ev.t === 'reject' ? 'bad' : 'test');
+    html += `<div class="${cls}">${s[i]}</div>`;
+    if (endAt.has(i) && !(parts.length === 4 && i === n - 1)) html += '<div class="dot">.</div>';
+  }
+  const strip = $('digitStrip');
+  strip.className = 'strip' + (n > 24 ? ' small' : '');
+  strip.innerHTML = html || '<span class="empty">Chưa có dữ liệu.</span>';
+  let cur = parts.join('.');
+  let curHtml = esc(cur);
+  if (cand) {
+    const seg = s.substr(cand.pos, cand.len);
+    curHtml += (cur ? '.' : '') + `<span class="${ev.t === 'reject' ? 'bad' : 'c'}">${esc(seg)}</span>`;
+  }
+  $('curIp').innerHTML = curHtml || '<span class="empty" style="font-size:13px">IP đang xây sẽ hiện ở đây</span>';
+}
+
+function renderStats() {
+  const st = ctx.stats;
+  $('stCalls').textContent = st.calls;
+  $('stTries').textContent = st.tries;
+  $('stRejects').textContent = st.rejects;
+  $('stPrunes').textContent = st.prunes;
+  $('stSol').textContent = st.solutions;
+  $('stBrute').textContent = combos3(ctx.s.length).toLocaleString('vi-VN');
+}
+
+function renderResults() {
+  const r = ctx.results;
+  $('resCount').textContent = r.length + ' địa chỉ';
+  $('resultList').innerHTML = r.length ? r.map(x => `<span class="ipchip">${x}</span>`).join('') : '<span class="empty">Chưa có kết quả.</span>';
+}
+
+function renderTree(activeId) {
+  const T = ctx.tree, SLOT = 58, DY = 74, NW = 48, NH = 26, PADX = 30, PADY = 30;
+  let leaf = 0;
+  const pos = new Array(T.length);
+  (function lay(id) {
+    const nd = T[id];
+    if (!nd.children.length) { pos[id] = { x: leaf++ * SLOT, y: nd.depth * DY }; return; }
+    nd.children.forEach(lay);
+    const xs = nd.children.map(c => pos[c].x);
+    pos[id] = { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: nd.depth * DY };
+  })(0);
+  const maxDepth = Math.max(...T.map(t => t.depth));
+  const W = Math.max(leaf * SLOT + PADX * 2, 300), H = (maxDepth + 1) * DY + PADY;
+  let edges = '', nodes = '';
+  T.forEach(nd => {
+    const p = pos[nd.id];
+    if (nd.parent >= 0) {
+      const q = pos[nd.parent];
+      edges += `<path class="te" d="M${q.x + PADX} ${q.y + PADY + NH / 2} C${q.x + PADX} ${q.y + PADY + DY / 2}, ${p.x + PADX} ${p.y + PADY - DY / 2 + NH}, ${p.x + PADX} ${p.y + PADY - NH / 2}"/>`;
+    }
+    const reason = { lead0: 'số 0 đứng đầu', gt255: 'lớn hơn 255', length: 'tỉa theo độ dài', dead: 'đủ 4 đoạn nhưng còn dư chữ số' }[nd.reason] || '';
+    const label = nd.parent < 0 ? '∅' : nd.seg;
+    nodes += `<g class="tn ${nd.status}${nd.id === activeId ? ' active' : ''}" transform="translate(${p.x + PADX - NW / 2},${p.y + PADY - NH / 2})"><title>${label} ${nd.status}${reason ? ': ' + reason : ''}</title><rect width="${NW}" height="${NH}" rx="7"/><text x="${NW / 2}" y="${NH / 2 + 1}">${esc(label)}</text></g>`;
+  });
+  const svg = $('treeSvg');
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+  svg.innerHTML = edges + nodes;
+  if (activeId >= 0) {
+    const wrap = $('treeWrap'), p = pos[activeId];
+    const x = p.x + PADX;
+    if (x < wrap.scrollLeft + 60 || x > wrap.scrollLeft + wrap.clientWidth - 60) wrap.scrollLeft = Math.max(0, x - wrap.clientWidth / 2);
+  }
+}
+
+function timeIt(fn) {
+  const t0 = performance.now();
+  let reps = 0;
+  do { fn(); reps++; } while (performance.now() - t0 < 30 && reps < 3000);
+  return (performance.now() - t0) / reps;
+}
+
+function compare() {
+  const inp = readInput();
+  if (!inp.ok) return;
+  const s = inp.s;
+  const bf = bruteForce(s), a = runAll(s, false), b = runAll(s, true);
+  const tbf = timeIt(() => bruteForce(s)), ta = timeIt(() => runAll(s, false)), tb = timeIt(() => runAll(s, true));
+  const same = canon(bf.results) === canon(a.results) && canon(a.results) === canon(b.results);
+  const rows = [
+    ['Vét cạn (thử mọi cách cắt 3 vị trí)', bf.checks, '-', bf.results.length, tbf],
+    ['Quay lui, không cắt tỉa độ dài', a.stats.tries, a.stats.calls, a.results.length, ta],
+    ['Quay lui, có cắt tỉa độ dài', b.stats.tries, b.stats.calls, b.results.length, tb],
+  ];
+  const mx = Math.max(...rows.map(r => r[1]), 1);
+  $('compareBox').innerHTML = `<table><tr><th>Cách giải</th><th>Số phép thử</th><th>Số nút</th><th>Kết quả</th><th>Thời gian</th><th></th></tr>` +
+    rows.map(r => `<tr><td>${r[0]}</td><td class="num">${r[1].toLocaleString('vi-VN')}</td><td class="num">${r[2]}</td><td class="num">${r[3]}</td><td class="num">${r[4].toFixed(3)} ms</td><td style="width:90px"><div class="bar" style="width:${Math.max(2, (r[1] / mx) * 100)}%"></div></td></tr>`).join('') +
+    `</table><div class="sum">${same ? '<span class="badge ok">3 cách cho cùng tập kết quả</span>' : '<span class="badge fail">KẾT QUẢ KHÁC NHAU</span>'}</div>` +
+    `<div class="note">Phép thử: vét cạn là số cách cắt C(n−1, 3) đã kiểm tra, quay lui là số đoạn đã thử.</div>`;
+}
+
+function runTests() {
+  if (!TESTS.length) { $('testSummary').textContent = 'Chưa nhúng testcase vào trang.'; return; }
+  let pass = 0;
+  const rows = TESTS.map(t => {
+    const t0 = performance.now();
+    const got = runAll(t.input, true).results;
+    const ms = performance.now() - t0;
+    const ok = canon(got) === canon(t.expected);
+    if (ok) pass++;
+    return `<tr><td>${t.group}</td><td>${t.name}</td><td class="num">${t.input.length}</td><td class="num">${t.expected.length}</td><td class="num">${got.length}</td><td class="num">${ms.toFixed(2)} ms</td><td><span class="badge ${ok ? 'ok' : 'fail'}">${ok ? 'ĐẠT' : 'SAI'}</span></td></tr>`;
+  });
+  $('testsBox').innerHTML = `<table><tr><th>Nhóm</th><th>Tên</th><th>Độ dài</th><th>Đáp án</th><th>Thu được</th><th>Thời gian</th><th>Kết quả</th></tr>${rows.join('')}</table>`;
+  $('testSummary').innerHTML = `Đạt ${pass} / ${TESTS.length} testcase ` + (pass === TESTS.length ? '<span class="badge ok">TẤT CẢ ĐẠT</span>' : '<span class="badge fail">CÓ TEST SAI</span>');
+}
+
+function init() {
+  buildCode();
+  $('presetSelect').innerHTML = '<option value="">Chọn test mẫu...</option>' + PRESETS.map((p, i) => `<option value="${i}">${esc(p[1])}</option>`).join('');
+  $('presetSelect').addEventListener('change', e => {
+    if (e.target.value === '') return;
+    $('inputStr').value = PRESETS[+e.target.value][0];
+    resetRun();
+  });
+  $('inputStr').addEventListener('input', resetRun);
+  $('btnPlay').addEventListener('click', togglePlay);
+  $('btnStep').addEventListener('click', () => { if (finished) { resetRun(); } stopTimer(); if (it && !finished) { $('btnPlay').textContent = '▶ Tiếp tục'; stepOnce(); } });
+  $('btnReset').addEventListener('click', resetRun);
+  $('chkPrune').addEventListener('change', () => { setPruneLook(); resetRun(); });
+  $('speedRange').addEventListener('input', e => { $('speedLabel').textContent = e.target.value + ' ms/bước'; });
+  $('btnRandom').addEventListener('click', () => { $('inputStr').value = randomSolvable(); $('presetSelect').value = ''; resetRun(); });
+  $('btnCompare').addEventListener('click', compare);
+  $('btnRunTests').addEventListener('click', runTests);
+  setPruneLook();
+  resetRun();
+}
+if (typeof document !== 'undefined' && document.getElementById('code')) init();
+</script>
+</body>
+</html>
