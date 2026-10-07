@@ -25,10 +25,3 @@ python3 source/gen_testcases.py        # sinh lại testcase, tự đối chiế
 python3 source/embed_tests.py          # nhúng testcase vào index.html
 node source/test_core.js source/index.html
 ```
-
-## Việc còn lại của sinh viên
-
-1. Nộp thử WeCode và xác nhận kết quả .
-2. Nghe lại video và kiểm thử lại bằng tay trước khi nộp.
-
-Sau khi sửa `.tex`, biên dịch lại thành PDF (Overleaf, hoặc `tectonic Bao_Cao_Bai_Tap_Lon.tex`).
